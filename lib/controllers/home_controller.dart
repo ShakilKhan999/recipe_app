@@ -1,5 +1,4 @@
 // lib/app/controllers/home_controller.dart
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -15,16 +14,15 @@ class HomeController extends GetxController {
   RxBool isLoading = false.obs;
   RxString selectedCategory = 'All'.obs;
 
-  // Predefined categories for recipes
-  final categories = [
+  // Predefined categories for recipes as RxList
+  final RxList<String> categories = [
     'All',
     'Breakfast',
     'Main Course',
     'Dessert',
-    'Vegetarian',
     'Quick Meals',
     'Healthy',
-  ];
+  ].obs;
 
   @override
   void onInit() {
@@ -32,7 +30,6 @@ class HomeController extends GetxController {
     _loadFromStorage();
   }
 
-  // Load saved data from local storage
   void _loadFromStorage() {
     final box = GetStorage();
     final savedMeals = box.read('meals');
@@ -43,10 +40,15 @@ class HomeController extends GetxController {
     }
     if (savedRecs != null) {
       savedRecipes.value = List<Map<String, dynamic>>.from(savedRecs);
+      // Convert categories to List<String> when loading
+      for (var recipe in savedRecipes) {
+        if (recipe['categories'] != null) {
+          recipe['categories'] = (recipe['categories'] as List).map((e) => e.toString()).toList();
+        }
+      }
     }
   }
 
-  // Generate recipe using Gemini AI
   Future<String> generateRecipe(String ingredients) async {
     isLoading.value = true;
     try {
@@ -69,7 +71,6 @@ class HomeController extends GetxController {
     }
   }
 
-  // Add a new meal to today's meals
   void addMeal(String mealType, String food, int calories) {
     todayMeals.add({
       'type': mealType,
@@ -80,12 +81,14 @@ class HomeController extends GetxController {
     _updateStorage();
   }
 
-  // Save a generated recipe with categories
-  void saveRecipe(String recipe, String ingredients, List<String> categories) {
+  void saveRecipe(String recipe, String ingredients, List<String> recipeCategories) {
+    // Ensure categories are strings
+    final List<String> validCategories = recipeCategories.map((e) => e.toString()).toList();
+    
     savedRecipes.add({
       'recipe': recipe,
       'ingredients': ingredients,
-      'categories': categories,
+      'categories': validCategories,
       'timestamp': DateTime.now().toIso8601String(),
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'isFavorite': false,
@@ -93,17 +96,16 @@ class HomeController extends GetxController {
     _updateStorage();
   }
 
-  // Get recipes filtered by selected category
   List<Map<String, dynamic>> getFilteredRecipes() {
     if (selectedCategory.value == 'All') {
       return savedRecipes;
     }
-    return savedRecipes.where((recipe) => 
-      (recipe['categories'] as List<String>).contains(selectedCategory.value)
-    ).toList();
+    return savedRecipes.where((recipe) {
+      final recipeCategories = (recipe['categories'] as List).map((e) => e.toString()).toList();
+      return recipeCategories.contains(selectedCategory.value);
+    }).toList();
   }
 
-  // Toggle favorite status of a recipe
   void toggleFavorite(String id) {
     final index = savedRecipes.indexWhere((recipe) => recipe['id'] == id);
     if (index != -1) {
@@ -112,31 +114,26 @@ class HomeController extends GetxController {
     }
   }
 
-  // Delete a recipe
   void deleteRecipe(String id) {
     savedRecipes.removeWhere((recipe) => recipe['id'] == id);
     _updateStorage();
   }
 
-  // Clear all meals for today
   void clearTodayMeals() {
     todayMeals.clear();
     _updateStorage();
   }
 
-  // Get total calories for today
   int getTotalCalories() {
     return todayMeals.fold(0, (sum, meal) => sum + (meal['calories'] as int));
   }
 
-  // Update local storage with current data
   void _updateStorage() {
     final box = GetStorage();
     box.write('meals', todayMeals.toList());
     box.write('recipes', savedRecipes.toList());
   }
 
-  // Clean up resources
   @override
   void onClose() {
     super.onClose();

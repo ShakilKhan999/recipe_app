@@ -3,13 +3,15 @@ import 'package:get/get.dart';
 import '../controllers/chatbot_controller.dart';
 
 class ChatbotView extends GetView<ChatbotController> {
+  const ChatbotView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        title: Text(
+        title: const Text(
           'AI Food Assistant',
           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
@@ -21,25 +23,25 @@ class ChatbotView extends GetView<ChatbotController> {
           children: [
             Expanded(
               child: Obx(() => ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: controller.messages.length,
                 itemBuilder: (context, index) {
                   final message = controller.messages[index];
                   return Padding(
-                    padding: EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: Align(
                       alignment: message['isUser'] 
                           ? Alignment.centerRight 
                           : Alignment.centerLeft,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
                           color: message['isUser'] 
                               ? Colors.blue[600] 
                               : Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
-                            BoxShadow(
+                            const BoxShadow(
                               color: Colors.black12,
                               offset: Offset(0, 2),
                               blurRadius: 4,
@@ -62,8 +64,8 @@ class ChatbotView extends GetView<ChatbotController> {
               )),
             ),
             Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
@@ -87,21 +89,21 @@ class ChatbotView extends GetView<ChatbotController> {
                           borderRadius: BorderRadius.circular(25),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 10,
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.blue[600],
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.send_rounded, color: Colors.white),
+                      icon: const Icon(Icons.send_rounded, color: Colors.white),
                       onPressed: () {
                         if (controller.messageController.text.isNotEmpty) {
                           controller.sendMessage(
